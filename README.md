@@ -13,3 +13,5 @@ NEU Datastructure
 
 **简介**    
 没有简介
+**New Function**
+(1)Before each term of selling one ticket,you can choose if adding a new ticket buyyer into the waiting queue
