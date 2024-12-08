@@ -1,4 +1,4 @@
-ï»¿#include<iostream>
+#include<iostream>
 #include<vector>
 #include<deque>
 #include <algorithm>
@@ -7,56 +7,69 @@ using namespace std;
 
 int main()
 {
-	int n;
+	int n=-1;
 	vector<int>ticketnumber;
 	int max = 0, min = 10000000;
-	cout << "è¯·è¾“å…¥è´­ç¥¨è€…æ•°é‡ï¼š";
-	cin >> n;
+	while (n <= 0)
+	{
+		cout << "ÇëÊäÈë¹ºÆ±ÕßÊıÁ¿£º";//·ÀÖ¹´íÎóÊäÈë
+		cin >> n;
+		if (n > 0)break;
+	}
+	
+	cout << "Éú³ÉËæ»ú¹ºÆ±±àºÅ...\n";
+	srand(static_cast<unsigned>(time(0))); // Ëæ»úÖÖ×Ó
 
-	
-	cout << "ç”Ÿæˆéšæœºè´­ç¥¨ç¼–å·...\n";
-	srand(static_cast<unsigned>(time(0))); // éšæœºç§å­
-	
 	for (int i = 0; i < n; ++i) {
-		cout << "è´­ç¥¨è€…éšæœºç¼–å·ï¼š";
+		cout << "¹ºÆ±ÕßËæ»ú±àºÅ£º";
 		int current = rand() % 10000 + 1;
-		ticketnumber.push_back(current); // éšæœºç¼–å·1åˆ°10000
+		ticketnumber.push_back(current); // Ëæ»ú±àºÅ1µ½10000
 		cout << current << endl;
 	}
 	cout << endl;
 
-	sort(ticketnumber.begin(), ticketnumber.end());//å°åˆ°å¤§æ’åº
+	sort(ticketnumber.begin(), ticketnumber.end());//Ğ¡µ½´óÅÅĞò
 	deque<int> queue(ticketnumber.begin(), ticketnumber.end());
-	// æ¨¡æ‹Ÿå”®ç¥¨è¿‡ç¨‹
-	cout << "å¼€å§‹å”®ç¥¨...\n";
-	srand(static_cast<unsigned>(time(0))); // éšæœºç§å­
+	// Ä£ÄâÊÛÆ±¹ı³Ì
+	cout << "¿ªÊ¼ÊÛÆ±...\n";
+	srand(static_cast<unsigned>(time(0))); // Ëæ»úÖÖ×Ó
 
 	while (!queue.empty()) {
-		//æ˜¯å¦æœ‰æ–°æ¥çš„è´­ç¥¨è€…
-		cout << "1ï¼šåŠ å…¥è´­ç¥¨è€… 2ï¼šç»§ç»­å–ç¥¨" << endl;
-		int choice,current=0;
+		//ÊÇ·ñÓĞĞÂÀ´µÄ¹ºÆ±Õß
+		cout << "1£º¼ÓÈë¹ºÆ±Õß 2£º¼ÌĞøÂôÆ±" << endl;//´Ë´¦ÊÇÁ½¸öbotton
+		int choice, current = 0;
 		cin >> choice;
 		switch (choice)
 		{
-		case 1://åŠ å…¥è´­ç¥¨è€…
-			current = rand() % 10000 + 1;
-			queue.push_back(current);
+		case 1://¼ÓÈë¹ºÆ±Õß
+			int m;
+			cout << "ÇëÊäÈëĞÂÀ´µÄ¹ºÆ±ÕßÈËÊı£º\n";
+			cin >> m;
+			for (int i = 0; i < m; i++)
+			{
+				cout << "ĞÂµÄ¹ºÆ±ÕßËæ»ú±àºÅ£º";
+				current = rand() % 10000 + 1;
+				queue.push_back(current);
+				cout << current << endl;
+			}
 			sort(queue.begin(), queue.end());
-		case 2://ç»§ç»­å–ç¥¨
-			int command = rand() % 2; // éšæœºæŒ‡ä»¤0æˆ–1
+			//È»ºó¼ÌĞøÂôÆ±
+		case 2://¼ÌĞøÂôÆ±
+			int command = rand() % 2; // Ëæ»úÖ¸Áî0»ò1
+			cout << "Ëæ»úÖ¸ÁîÎª" << command << endl;
 			if (command == 0) {
-				// æœ€å°ç¼–å·è´­ç¥¨
-				cout << "ç¼–å· " << queue.front() << " çš„è´­ç¥¨è€…è´­ç¥¨æˆåŠŸã€‚\n";
+				// ×îĞ¡±àºÅ¹ºÆ±
+				cout << "±àºÅ " << queue.front() << " µÄ¹ºÆ±Õß¹ºÆ±³É¹¦¡£\n";
 				queue.pop_front();
 			}
 			else {
-				// æœ€å¤§ç¼–å·è´­ç¥¨
-				cout << "ç¼–å· " << queue.back() << " çš„è´­ç¥¨è€…è´­ç¥¨æˆåŠŸã€‚\n";
+				// ×î´ó±àºÅ¹ºÆ±
+				cout << "±àºÅ " << queue.back() << " µÄ¹ºÆ±Õß¹ºÆ±³É¹¦¡£\n";
 				queue.pop_back();
 			}
 			break;
 		}
 	}
 
-	cout << "æ‰€æœ‰è´­ç¥¨è€…å·²å®Œæˆè´­ç¥¨ï¼\n";
+	cout << "ËùÓĞ¹ºÆ±ÕßÒÑÍê³É¹ºÆ±£¡\n";
 }
