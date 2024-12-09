@@ -1,133 +1,153 @@
-#include<iostream>
-#include<vector>
-#include<deque>
+#include <iostream>
+#include <vector>
+#include <deque>
 #include <algorithm>
+#include <ctime>
+#include <cstdlib>
 
 using namespace std;
-typedef struct Fan {
-	int number;//购票编号
-	int level;//票的等级 0：普通  1：VIP
-}Fan;
-bool comp(const Fan& a, const Fan& b)
-{
-	return a.number < b.number;
+
+// 基类：Fan
+class Fan {
+protected:
+    int number; // 购票编号
+public:
+    Fan(int num) : number(num) {}
+    virtual ~Fan() {}
+
+    int getNumber() const { return number; }
+    virtual string getType() const = 0; // 纯虚函数，用于获取购票者类型
+};
+
+// 普通购票者类
+class TicketFan : public Fan {
+public:
+    TicketFan(int num) : Fan(num) {}
+    string getType() const override { return "普通购票者"; }
+};
+
+// VIP购票者类
+class VIPFan : public Fan {
+public:
+    VIPFan(int num) : Fan(num) {}
+    string getType() const override { return "VIP购票者"; }
+};
+
+// 按编号排序
+bool comp(const Fan* a, const Fan* b) {
+    return a->getNumber() < b->getNumber();
 }
-void addfan(deque<Fan>&ticket,deque<Fan>&vip)
-{
-	Fan newfan;
-	cout << "购票者随机编号：";
-	newfan.number = rand() % 10000 + 1;
-	cout << newfan.number << endl;
 
-	cout << "购票类型：";
-	newfan.level = (0 < (rand() % 5)) ? 0 : 1;//五分之一概率为vip
-	cout << newfan.level << endl;
+// 添加购票者
+void addFan(deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue) {
+    int randomNumber = rand() % 10000 + 1;
+    int randomType = (rand() % 5 == 0) ? 1 : 0; // 五分之一概率为 VIP
 
-	if (newfan.level == 0)//普通票
-	{
-		ticket.push_back(newfan);
-	}
-	else
-	{
-		vip.push_back(newfan);
-	}
+    if (randomType == 0) {
+        ticketQueue.push_back(new TicketFan(randomNumber));
+        cout << "加入购票者编号: " << randomNumber << ", 类型: 普通购票者\n";
+    }
+    else {
+        vipQueue.push_back(new VIPFan(randomNumber));
+        cout << "加入购票者编号: " << randomNumber << ", 类型: VIP购票者\n";
+    }
 }
-void buyticket(int command, deque<Fan>& ticket)
-{
-	if (ticket.empty())
-	{
-		return;
-	}
-	if (command == 0) {
-		// 最小编号购票
-		cout << "编号 " << ticket.front().number << " 的购票者购票成功。\n";
-		ticket.pop_front();
-	}
-	else {
-		// 最大编号购票
-		cout << "编号 " << ticket.back().number << " 的购票者购票成功。\n";
-		ticket.pop_back();
-	}
+
+// 购票处理
+void buyTicket(int command, deque<Fan*>& queue) {
+    if (queue.empty()) return;
+
+    if (command == 0) {
+        cout << queue.front()->getType() << "编号 " << queue.front()->getNumber() << " 购票成功。\n";
+        delete queue.front(); // 删除对象释放内存
+        queue.pop_front();
+    }
+    else {
+        cout << queue.back()->getType() << "编号 " << queue.back()->getNumber() << " 购票成功。\n";
+        delete queue.back(); // 删除对象释放内存
+        queue.pop_back();
+    }
 }
-void buyvip(int command, deque<Fan>& ticket, deque<Fan>& vip)
-{
-	if (vip.empty())//当vip队伍为空时，vip窗口可卖普通票
-	{
-		buyticket(command, ticket);
-	}
-	else
-	{
-		buyticket(command, vip);
-	}
+
+// VIP窗口购票
+void buyVIP(int command, deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue) {
+    if (vipQueue.empty()) {
+        buyTicket(command, ticketQueue);
+    }
+    else {
+        buyTicket(command, vipQueue);
+    }
 }
-void function(int choice, deque<Fan>& ticket, deque<Fan>& vip)
-{
-	switch (choice)
-	{
-	case 1://加入购票者
-		int m;
-		cout << "请输入新来的购票者人数：\n";
-		cin >> m;
-		for (int i = 0; i < m; i++)
-		{
-			addfan(ticket, vip);
-		}
-		sort(ticket.begin(), ticket.end(), comp);//小到大排序
-		sort(vip.begin(), vip.end(), comp);
 
-		//然后继续卖票
-	case 2://继续卖票
-		int command = rand() % 2; // 随机指令0或1
-		cout << "随机指令为" << command << endl;
-		buyticket(command, ticket);
-		buyvip(command, ticket, vip);
-		break;
-	}
+// 功能选择
+void function(int choice, deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue) {
+    switch (choice) {
+    case 1: {
+        int m;
+        cout << "请输入新来的购票者人数：\n";
+        cin >> m;
+        for (int i = 0; i < m; ++i) {
+            addFan(ticketQueue, vipQueue);
+        }
+        sort(ticketQueue.begin(), ticketQueue.end(), comp);
+        sort(vipQueue.begin(), vipQueue.end(), comp);
+        break;
+    }
+    case 2: {
+        int command = rand() % 2; // 随机指令 0 或 1
+        cout << "随机指令为: " << command << endl;
+        buyTicket(command, ticketQueue);
+        buyVIP(command, ticketQueue, vipQueue);
+        break;
+    }
+    }
 }
-int main()
-{
-	int n = -1;
-	deque<Fan> ticketqueue;
-	deque<Fan> vipqueue;
 
-	while (n <= 0)
-	{
-		cout << "请输入购票者数量：";//防止错误输入
-		cin >> n;
-		if (n > 0)break;
-	}
+// 主函数
+int main() {
+    int n = -1;
+    deque<Fan*> ticketQueue;
+    deque<Fan*> vipQueue;
 
-	cout << "生成随机购票编号以及票的类型...\n";
-	srand(static_cast<unsigned>(time(0))); // 随机种子
+    cout << "请输入购票者数量：";
+    while (n <= 0) {
+        cin >> n;
+        if (n > 0) break;
+    }
 
-	for (int i = 0; i < n; ++i) {
-		
-		addfan(ticketqueue, vipqueue);
-	}
-	cout << endl;
+    cout << "生成随机购票编号以及票的类型...\n";
+    srand(static_cast<unsigned>(time(0)));
 
-	sort(ticketqueue.begin(), ticketqueue.end(),comp);//小到大排序
-	sort(vipqueue.begin(), vipqueue.end(), comp);
+    for (int i = 0; i < n; ++i) {
+        addFan(ticketQueue, vipQueue);
+    }
+    cout << endl;
 
-	
-	// 模拟售票过程
-	cout << "开始售票...\n";
-	srand(static_cast<unsigned>(time(0))); // 随机种子
+    sort(ticketQueue.begin(), ticketQueue.end(), comp);
+    sort(vipQueue.begin(), vipQueue.end(), comp);
 
-	while (!ticketqueue.empty()||!vipqueue.empty()) {
-		//是否有新来的购票者
-		cout << "1：加入购票者 2：继续卖票" << endl;//此处是两个botton
-		int choice, current = 0;
-		cin >> choice;
-		function(choice, ticketqueue, vipqueue);
-		if (ticketqueue.empty() && vipqueue.empty())
-		{
-			cout << "1：加入购票者 2：退出" << endl;//此处是两个botton
-			cin >> choice;
-			if (choice == 2)break;
-			function(1, ticketqueue, vipqueue);
-		}
-	}
+    cout << "开始售票...\n";
 
-	cout << "所有购票者已完成购票！\n";
+    while (!ticketQueue.empty() || !vipQueue.empty()) {
+        cout << "1：加入购票者 2：继续卖票\n";
+        int choice;
+        cin >> choice;
+
+        function(choice, ticketQueue, vipQueue);
+
+        if (ticketQueue.empty() && vipQueue.empty()) {
+            cout << "1：加入购票者 2：退出\n";
+            cin >> choice;
+            if (choice == 2) break;
+            function(1, ticketQueue, vipQueue);
+        }
+    }
+
+    cout << "所有购票者已完成购票！\n";
+
+    // 清理剩余队列中的对象
+    for (Fan* fan : ticketQueue) delete fan;
+    for (Fan* fan : vipQueue) delete fan;
+
+    return 0;
 }
