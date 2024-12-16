@@ -14,5 +14,7 @@ NEU Datastructure
 **简介**    
 没有简介       
 **New Function**        
-(1)Before each term of selling one ticket,you can choose if adding a new ticket buyyer into the waiting queue         
-  
+(1)随机生成vip购票者和普通购票者       
+(2)vip和普通购票者各有一个购票通道（队列）      
+(3)如果某一队列满员，则其余人员全部强制放入另一队列        
+(4)若两队列均满员，则不再接受新购票者
