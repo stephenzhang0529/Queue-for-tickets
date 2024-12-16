@@ -1,75 +1,142 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <vector>
 #include <deque>
+#include <set>
 #include <algorithm>
 #include <ctime>
 #include <cstdlib>
 
 using namespace std;
 
-// »ùÀà£ºFan
+#define MAXSIZE  10 //æ”¹å˜æ­¤æ•°å€¼å¯æ”¹å˜æ•°æ®å¤§å°
+set<int>ticketset, vipset;
+
+// åŸºç±»ï¼šFan
 class Fan {
 protected:
-    int number; // ¹ºÆ±±àºÅ
+    int number; // è´­ç¥¨ç¼–å·
 public:
     Fan(int num) : number(num) {}
     virtual ~Fan() {}
 
     int getNumber() const { return number; }
-    virtual string getType() const = 0; // ´¿Ğéº¯Êı£¬ÓÃÓÚ»ñÈ¡¹ºÆ±ÕßÀàĞÍ
+    virtual int getInt() const = 0;
+    virtual string getType() const = 0; // çº¯è™šå‡½æ•°ï¼Œç”¨äºè·å–è´­ç¥¨è€…ç±»å‹
 };
 
-// ÆÕÍ¨¹ºÆ±ÕßÀà
+// æ™®é€šè´­ç¥¨è€…ç±»
 class TicketFan : public Fan {
 public:
     TicketFan(int num) : Fan(num) {}
-    string getType() const override { return "ÆÕÍ¨¹ºÆ±Õß"; }
+    int getInt() const override { return 0; }
+    string getType() const override { return "æ™®é€šè´­ç¥¨è€…"; }
 };
 
-// VIP¹ºÆ±ÕßÀà
+// VIPè´­ç¥¨è€…ç±»
 class VIPFan : public Fan {
 public:
     VIPFan(int num) : Fan(num) {}
-    string getType() const override { return "VIP¹ºÆ±Õß"; }
+    int getInt() const override { return 1; }
+    string getType() const override { return "VIPè´­ç¥¨è€…"; }
 };
 
-// °´±àºÅÅÅĞò
+// æŒ‰ç¼–å·æ’åº
 bool comp(const Fan* a, const Fan* b) {
     return a->getNumber() < b->getNumber();
 }
 
-// Ìí¼Ó¹ºÆ±Õß
-void addFan(deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue) {
-    int randomNumber = rand() % 10000 + 1;
-    int randomType = (rand() % 5 == 0) ? 1 : 0; // Îå·ÖÖ®Ò»¸ÅÂÊÎª VIP
-
-    if (randomType == 0) {
-        ticketQueue.push_back(new TicketFan(randomNumber));
-        cout << "¼ÓÈë¹ºÆ±Õß±àºÅ: " << randomNumber << ", ÀàĞÍ: ÆÕÍ¨¹ºÆ±Õß\n";
-    }
-    else {
-        vipQueue.push_back(new VIPFan(randomNumber));
-        cout << "¼ÓÈë¹ºÆ±Õß±àºÅ: " << randomNumber << ", ÀàĞÍ: VIP¹ºÆ±Õß\n";
-    }
+//éšæœºç”Ÿæˆä¸é‡å¤çš„ç¼–å·
+int generate(set<int>& ticketset)
+{
+    int num;
+    do {
+        num= rand() % MAXSIZE + 1;
+    } while (ticketset.count(num));
+    ticketset.insert(num);
+    return num;
 }
 
-// ¹ºÆ±´¦Àí
+//åˆ¤æ–­æ˜¯å¦æ»¡å‘˜
+bool judgefull(set<int>& ticketset)
+{
+    if (ticketset.size() == MAXSIZE)
+    {
+        return true;
+    }
+    return false;
+}
+
+// æ·»åŠ è´­ç¥¨è€…
+void addFan(deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue, bool break_) {
+    int randomType = (rand() % 5 == 0) ? 1 : 0; // äº”åˆ†ä¹‹ä¸€æ¦‚ç‡ä¸º VIP
+    int randomNumber;
+
+    if(!judgefull(ticketset) && !judgefull(vipset))
+    {
+        if (randomType == 0) {
+            randomNumber = generate(ticketset);
+            ticketQueue.push_back(new TicketFan(randomNumber));
+            cout << "åŠ å…¥è´­ç¥¨è€…ç¼–å·: " << randomNumber << ", ç±»å‹: æ™®é€šè´­ç¥¨è€…\n";
+        }
+        else {
+            randomNumber = generate(vipset);
+            vipQueue.push_back(new VIPFan(randomNumber));
+            cout << "åŠ å…¥è´­ç¥¨è€…ç¼–å·: " << randomNumber << ", ç±»å‹: VIPè´­ç¥¨è€…\n";
+        }
+    }
+    else if (judgefull(ticketset) && !judgefull(vipset))
+    {
+        randomNumber = generate(vipset);
+        vipQueue.push_back(new VIPFan(randomNumber));
+        cout << "åŠ å…¥è´­ç¥¨è€…ç¼–å·: " << randomNumber << ", ç±»å‹: VIPè´­ç¥¨è€…\n";
+    }
+    else if (!judgefull(ticketset) && judgefull(vipset))
+    {
+        randomNumber = generate(ticketset);
+        ticketQueue.push_back(new TicketFan(randomNumber));
+        cout << "åŠ å…¥è´­ç¥¨è€…ç¼–å·: " << randomNumber << ", ç±»å‹: æ™®é€šè´­ç¥¨è€…\n";
+    }
+    else
+    {
+        cout << "å…¨éƒ¨æ»¡å‘˜ï¼\n";
+        break_ = true;
+    }
+    
+}
+
+// è´­ç¥¨å¤„ç†
 void buyTicket(int command, deque<Fan*>& queue) {
     if (queue.empty()) return;
 
     if (command == 0) {
-        cout << queue.front()->getType() << "±àºÅ " << queue.front()->getNumber() << " ¹ºÆ±³É¹¦¡£\n";
-        delete queue.front(); // É¾³ı¶ÔÏóÊÍ·ÅÄÚ´æ
+        cout << queue.front()->getType() << "ç¼–å· " << queue.front()->getNumber() << " è´­ç¥¨æˆåŠŸã€‚\n";
+        if (queue.front()->getInt() == 1)//åˆ¤æ–­vipè¿˜æ˜¯æ™®é€š
+        {
+            vipset.erase(queue.front()->getNumber());
+        }
+        else
+        {
+            ticketset.erase(queue.front()->getNumber());
+        }
+        delete queue.front(); // åˆ é™¤å¯¹è±¡é‡Šæ”¾å†…å­˜
         queue.pop_front();
     }
     else {
-        cout << queue.back()->getType() << "±àºÅ " << queue.back()->getNumber() << " ¹ºÆ±³É¹¦¡£\n";
-        delete queue.back(); // É¾³ı¶ÔÏóÊÍ·ÅÄÚ´æ
+        cout << queue.back()->getType() << "ç¼–å· " << queue.back()->getNumber() << " è´­ç¥¨æˆåŠŸã€‚\n";
+        if (queue.back()->getInt() == 1)//åˆ¤æ–­vipè¿˜æ˜¯æ™®é€š
+        {
+            vipset.erase(queue.back()->getNumber());
+        }
+        else
+        {
+            ticketset.erase(queue.back()->getNumber());
+        }
+        delete queue.back(); // åˆ é™¤å¯¹è±¡é‡Šæ”¾å†…å­˜
         queue.pop_back();
     }
 }
 
-// VIP´°¿Ú¹ºÆ±
+// VIPçª—å£è´­ç¥¨
 void buyVIP(int command, deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue) {
     if (vipQueue.empty()) {
         buyTicket(command, ticketQueue);
@@ -79,23 +146,30 @@ void buyVIP(int command, deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue) {
     }
 }
 
-// ¹¦ÄÜÑ¡Ôñ
+// åŠŸèƒ½é€‰æ‹©
 void function(int choice, deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue) {
     switch (choice) {
     case 1: {
         int m;
-        cout << "ÇëÊäÈëĞÂÀ´µÄ¹ºÆ±ÕßÈËÊı£º\n";
-        cin >> m;
+        cout << "è¯·è¾“å…¥æ–°æ¥çš„è´­ç¥¨è€…äººæ•°ï¼š\n";
+        do {
+            cin >> m;
+        } while (m < 0);//é”™è¯¯è¾“å…¥ä¿æŠ¤
         for (int i = 0; i < m; ++i) {
-            addFan(ticketQueue, vipQueue);
+            bool break_ = false;
+            addFan(ticketQueue, vipQueue,break_);
+            if (break_)
+            {
+                break;
+            }
         }
         sort(ticketQueue.begin(), ticketQueue.end(), comp);
         sort(vipQueue.begin(), vipQueue.end(), comp);
         break;
     }
     case 2: {
-        int command = rand() % 2; // Ëæ»úÖ¸Áî 0 »ò 1
-        cout << "Ëæ»úÖ¸ÁîÎª: " << command << endl;
+        int command = rand() % 2; // éšæœºæŒ‡ä»¤ 0 æˆ– 1
+        cout << "éšæœºæŒ‡ä»¤ä¸º: " << command << endl;
         buyTicket(command, ticketQueue);
         buyVIP(command, ticketQueue, vipQueue);
         break;
@@ -103,49 +177,38 @@ void function(int choice, deque<Fan*>& ticketQueue, deque<Fan*>& vipQueue) {
     }
 }
 
-// Ö÷º¯Êı
+// ä¸»å‡½æ•°
 int main() {
     int n = -1;
     deque<Fan*> ticketQueue;
     deque<Fan*> vipQueue;
 
-    cout << "ÇëÊäÈë¹ºÆ±ÕßÊıÁ¿£º";
-    while (n <= 0) {
-        cin >> n;
-        if (n > 0) break;
-    }
-
-    cout << "Éú³ÉËæ»ú¹ºÆ±±àºÅÒÔ¼°Æ±µÄÀàĞÍ...\n";
+    function(1, ticketQueue, vipQueue);
+    
     srand(static_cast<unsigned>(time(0)));
 
-    for (int i = 0; i < n; ++i) {
-        addFan(ticketQueue, vipQueue);
-    }
     cout << endl;
 
-    sort(ticketQueue.begin(), ticketQueue.end(), comp);
-    sort(vipQueue.begin(), vipQueue.end(), comp);
-
-    cout << "¿ªÊ¼ÊÛÆ±...\n";
+    cout << "å¼€å§‹å”®ç¥¨...\n";
 
     while (!ticketQueue.empty() || !vipQueue.empty()) {
-        cout << "1£º¼ÓÈë¹ºÆ±Õß 2£º¼ÌĞøÂôÆ±\n";
+        cout << "1ï¼šåŠ å…¥è´­ç¥¨è€… 2ï¼šç»§ç»­å–ç¥¨\n";
         int choice;
-        cin >> choice;
+        cin >> choice;//æ­¤å¤„ç•Œé¢ç”¨ä¸¤ä¸ªbottonæ›¿ä»£
 
         function(choice, ticketQueue, vipQueue);
 
         if (ticketQueue.empty() && vipQueue.empty()) {
-            cout << "1£º¼ÓÈë¹ºÆ±Õß 2£ºÍË³ö\n";
+            cout << "1ï¼šåŠ å…¥è´­ç¥¨è€… 2ï¼šé€€å‡º\n";
             cin >> choice;
             if (choice == 2) break;
             function(1, ticketQueue, vipQueue);
         }
     }
 
-    cout << "ËùÓĞ¹ºÆ±ÕßÒÑÍê³É¹ºÆ±£¡\n";
+    cout << "æ‰€æœ‰è´­ç¥¨è€…å·²å®Œæˆè´­ç¥¨ï¼\n";
 
-    // ÇåÀíÊ£Óà¶ÓÁĞÖĞµÄ¶ÔÏó
+    // æ¸…ç†å‰©ä½™é˜Ÿåˆ—ä¸­çš„å¯¹è±¡
     for (Fan* fan : ticketQueue) delete fan;
     for (Fan* fan : vipQueue) delete fan;
 
